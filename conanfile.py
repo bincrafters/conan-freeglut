@@ -12,7 +12,7 @@ class freeglutConan(ConanFile):
     url = "https://github.com/Croydon/conan-freeglut"
     homepage = "https://github.com/dcnieho/FreeGLUT"
     license = "X11"
-    exports = ["LICENSE.md", "CMakeLists.txt"]
+    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
@@ -60,6 +60,27 @@ class freeglutConan(ConanFile):
 
         # Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self.source_subfolder)
+
+
+    def system_requirements(self):
+        if self.settings.os == "Linux" and tools.os_info.is_linux:
+            installer = tools.SystemPackageTool()
+            if tools.os_info.with_apt:
+                if self.settings.arch == "x86":
+                    arch_suffix = ':i386'
+                elif self.settings.arch == "x86_64":
+                    arch_suffix = ':amd64'
+                packages = ['libglu1-mesa-dev%s' % arch_suffix]
+
+            if tools.os_info.with_yum:
+                if self.settings.arch == "x86":
+                    arch_suffix = '.i686'
+                elif self.settings.arch == 'x86_64':
+                    arch_suffix = '.x86_64'
+                packages = ['mesa-libGLU-devel%s' % arch_suffix]
+
+            for package in packages:
+                installer.install(package)
 
     def configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
