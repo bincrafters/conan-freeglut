@@ -15,11 +15,6 @@ class freeglutConan(ConanFile):
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
-
-    # Custom attributes for Bincrafters recipe conventions
-    source_subfolder = "source_subfolder"
-    build_subfolder = "build_subfolder"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,7 +26,6 @@ class freeglutConan(ConanFile):
         "replace_gut": [True, False],
         "install_pdb": [True, False]
     }
-
     default_options = (
         "shared=False",
         "fPIC=True",
@@ -42,6 +36,8 @@ class freeglutConan(ConanFile):
         "replace_gut=True",
         "install_pdb=False"
     )
+    source_subfolder = "source_subfolder"
+    build_subfolder = "build_subfolder"
 
     # FIXME: What are the recommended default values for print_errors and print_warnings?
 
@@ -53,12 +49,9 @@ class freeglutConan(ConanFile):
             self.options.install_pdb = False
 
     def source(self):
-        source_url = "https://github.com/dcnieho/FreeGLUT"
-        tools.get("{0}/archive/FG_{1}.tar.gz".format(source_url, self.version.replace(".", "_")))
-        # tools.get("file:FG_{}.tar.gz".format(self.version.replace(".", "_")))
+        archive_url = "https://github.com/dcnieho/FreeGLUT/archive/FG_{}.tar.gz".format(self.version.replace(".", "_"))
+        tools.get(archive_url, sha256="b0abf188cfbb572b9f9ef5c6adbeba8eedbd9a717897908ee9840018ab0b8eee")
         extracted_dir = "FreeGLUT-FG_" + self.version.replace(".", "_")
-
-        # Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self.source_subfolder)
 
 
