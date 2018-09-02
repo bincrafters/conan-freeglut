@@ -64,6 +64,7 @@ class freeglutConan(ConanFile):
                 elif self.settings.arch == "x86_64":
                     arch_suffix = ':amd64'
                 packages = ['libglu1-mesa-dev%s' % arch_suffix]
+                packages.append('libgl1-mesa-glx%s' % arch_suffix)
 
             if tools.os_info.with_yum:
                 if self.settings.arch == "x86":
@@ -71,6 +72,7 @@ class freeglutConan(ConanFile):
                 elif self.settings.arch == 'x86_64':
                     arch_suffix = '.x86_64'
                 packages = ['mesa-libGLU-devel%s' % arch_suffix]
+                packages.append('glx-utils%s' % arch_suffix)
 
             for package in packages:
                 installer.install(package)
