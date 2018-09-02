@@ -42,8 +42,3 @@ tmp/
 .pydevproject
 .settings/*
 .ropeproject/*
-
-# Conan
-conanbuildinfo.cmake
-conanbuildinfo.txt
-conaninfo.txt
