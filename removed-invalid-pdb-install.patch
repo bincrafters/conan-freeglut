@@ -1,0 +1,26 @@
+From dc6a80fbee0bede580f3275b226e8d858be0d337 Mon Sep 17 00:00:00 2001
+From: Rcmaniac25 <rcmaniac25@hotmail.com>
+Date: Sat, 17 Oct 2015 00:38:22 -0400
+Subject: [PATCH] Removed invalid PDB install
+
+---
+ CMakeLists.txt | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 28f8651..1639326 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -428,11 +428,6 @@ IF(FREEGLUT_BUILD_STATIC_LIBS)
+             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     )
+-    IF(INSTALL_PDB)
+-        INSTALL(FILES ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/Debug/freeglut_static${CMAKE_DEBUG_POSTFIX}.pdb
+-            DESTINATION lib
+-			CONFIGURATIONS Debug)
+-    ENDIF()
+ ENDIF()
+ INSTALL(FILES ${FREEGLUT_HEADERS} DESTINATION include/GL)
+
+--

@@ -14,7 +14,7 @@ class freeglutConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "X11"
     exports = ["LICENSE.md"]
-    exports_sources = ["CMakeLists.txt"]
+    exports_sources = ["*.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -40,10 +40,6 @@ class freeglutConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
-    # Known issues:
-    # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled https://github.com/dcnieho/FreeGLUT/issues/34
-    #    fixed in > 3.0.0
-
     def config_options(self):
         if self.settings.os == 'Windows':
             self.options.remove("fPIC")
@@ -57,6 +53,9 @@ class freeglutConan(ConanFile):
         extracted_dir = "FreeGLUT-FG_" + self.version.replace(".", "_")
         os.rename(extracted_dir, self.source_subfolder)
 
+        # Remove with > 3.0.0; https://github.com/dcnieho/FreeGLUT/issues/34
+        # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled
+        tools.patch(base_path=self.source_subfolder, patch_file="removed-invalid-pdb-install.patch")
 
     def system_requirements(self):
         if self.settings.os == "Linux" and tools.os_info.is_linux:
@@ -67,18 +66,19 @@ class freeglutConan(ConanFile):
                 elif self.settings.arch == "x86_64":
                     arch_suffix = ':amd64'
                 packages = ['libgl1-mesa-dev%s' % arch_suffix]
+                packages.append('libgl1-mesa-glx%s' % arch_suffix)
 
             if tools.os_info.with_yum:
                 if self.settings.arch == "x86":
                     arch_suffix = '.i686'
                 elif self.settings.arch == 'x86_64':
                     arch_suffix = '.x86_64'
-                packages = ['mesa-libGLU-devel%s' % arch_suffix]
-                packages.append('mesa-libGL-devel%s' % arch_suffix)
+                packages = ['mesa-libGL-devel%s' % arch_suffix]
+                packages.append('mesa-libGLU-devel%s' % arch_suffix)
                 packages.append('glx-utils%s' % arch_suffix)
 
-        for package in packages:
-            installer.install(package)
+            for package in packages:
+                installer.install(package)
 
     def configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
