@@ -33,14 +33,13 @@ class freeglutConan(ConanFile):
         "demos=False",
         "gles=False",
         "print_errors_at_runtime=True",
-        "print_warnings_at_runtime=False",
+        "print_warnings_at_runtime=True",
         "replace_glut=True",
         "install_pdb=False"
     )
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
-    # FIXME: What are the recommended default values for print_errors and print_warnings?
     # Known issues:
     # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled https://github.com/dcnieho/FreeGLUT/issues/34
     #    fixed in > 3.0.0
