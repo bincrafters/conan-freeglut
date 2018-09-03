@@ -40,10 +40,13 @@ class freeglutConan(ConanFile):
     build_subfolder = "build_subfolder"
 
     # FIXME: What are the recommended default values for print_errors and print_warnings?
+    # Known issues:
+    # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled https://github.com/dcnieho/FreeGLUT/issues/34
+    #    fixed in > 3.0.0
 
     def config_options(self):
         if self.settings.os == 'Windows':
-            self.options.fPIC = False
+            self.options.remove("fPIC")
             self.options.replace_gut = False
         if self.settings.compiler != "Visual Studio":
             self.options.install_pdb = False
@@ -63,8 +66,7 @@ class freeglutConan(ConanFile):
                     arch_suffix = ':i386'
                 elif self.settings.arch == "x86_64":
                     arch_suffix = ':amd64'
-                packages = ['libglu1-mesa-dev%s' % arch_suffix]
-                packages.append('libgl1-mesa-glx%s' % arch_suffix)
+                packages = ['libgl1-mesa-dev%s' % arch_suffix]
 
             if tools.os_info.with_yum:
                 if self.settings.arch == "x86":
@@ -72,10 +74,11 @@ class freeglutConan(ConanFile):
                 elif self.settings.arch == 'x86_64':
                     arch_suffix = '.x86_64'
                 packages = ['mesa-libGLU-devel%s' % arch_suffix]
+                packages.append('mesa-libGL-devel%s' % arch_suffix)
                 packages.append('glx-utils%s' % arch_suffix)
 
-            for package in packages:
-                installer.install(package)
+        for package in packages:
+            installer.install(package)
 
     def configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
