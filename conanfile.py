@@ -23,7 +23,7 @@ class freeglutConan(ConanFile):
         "gles": [True, False],
         "print_errors_at_runtime": [True, False],
         "print_warnings_at_runtime": [True, False],
-        "replace_gut": [True, False],
+        "replace_glut": [True, False],
         "install_pdb": [True, False]
     }
     default_options = (
@@ -33,7 +33,7 @@ class freeglutConan(ConanFile):
         "gles=False",
         "print_errors_at_runtime=True",
         "print_warnings_at_runtime=False",
-        "replace_gut=True",
+        "replace_glut=True",
         "install_pdb=False"
     )
     source_subfolder = "source_subfolder"
@@ -47,7 +47,7 @@ class freeglutConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             self.options.remove("fPIC")
-            self.options.replace_gut = False
+            self.options.replace_glut = False
         if self.settings.compiler != "Visual Studio":
             self.options.install_pdb = False
 
