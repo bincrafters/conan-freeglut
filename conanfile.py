@@ -103,14 +103,6 @@ class freeglutConan(ConanFile):
         self.copy(pattern="COPYING", dst=".", src=self.source_subfolder)
         cmake = self.configure_cmake()
         cmake.install()
-        # If the CMakeLists.txt has a proper install method, the steps below may be redundant
-        # If so, you can just remove the lines below
-        self.copy(pattern="*", dst="include", src=os.path.join(self.source_subfolder, "include"))
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
