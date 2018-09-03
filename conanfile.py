@@ -11,6 +11,7 @@ class freeglutConan(ConanFile):
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
     url = "https://github.com/Croydon/conan-freeglut"
     homepage = "https://github.com/dcnieho/FreeGLUT"
+    author = "Bincrafters <bincrafters@gmail.com>"
     license = "X11"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
@@ -47,7 +48,7 @@ class freeglutConan(ConanFile):
     def config_options(self):
         if self.settings.os == 'Windows':
             self.options.remove("fPIC")
-            self.options.replace_glut = False
+            self.options.replace_glut = True
         if self.settings.compiler != "Visual Studio":
             self.options.install_pdb = False
 
@@ -92,9 +93,7 @@ class freeglutConan(ConanFile):
         cmake.definitions["FREEGLUT_INSTALL_PDB"] = "ON" if self.options.install_pdb else "OFF"
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
-        if self.settings.os != 'Windows':
-            cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-        cmake.configure(build_folder=self.build_subfolder, source_folder=self.source_subfolder) # , source_folder=self.source_folder
+        cmake.configure(build_folder=self.build_subfolder, source_folder=self.source_subfolder)
         return cmake
 
     def build(self):
@@ -107,8 +106,7 @@ class freeglutConan(ConanFile):
         cmake.install()
         # If the CMakeLists.txt has a proper install method, the steps below may be redundant
         # If so, you can just remove the lines below
-        include_folder = os.path.join(self.source_subfolder, "include")
-        self.copy(pattern="*", dst="include", src=include_folder)
+        self.copy(pattern="*", dst="include", src=os.path.join(self.source_subfolder, "include"))
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
         self.copy(pattern="*.lib", dst="lib", keep_path=False)
         self.copy(pattern="*.a", dst="lib", keep_path=False)
