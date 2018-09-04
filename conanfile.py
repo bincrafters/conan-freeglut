@@ -14,7 +14,7 @@ class freeglutConan(ConanFile):
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "X11"
     exports = ["LICENSE.md"]
-    exports_sources = ["*.patch"]
+    exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -66,7 +66,11 @@ class freeglutConan(ConanFile):
                 elif self.settings.arch == "x86_64":
                     arch_suffix = ':amd64'
                 packages = ['libgl1-mesa-dev%s' % arch_suffix]
+                packages.append('libglu1-mesa-dev%s' % arch_suffix)
                 packages.append('libgl1-mesa-glx%s' % arch_suffix)
+                packages.append('libx11-dev%s' % arch_suffix)
+                packages.append('libxext-dev%s' % arch_suffix)
+                packages.append('libxi-dev%s' % arch_suffix)
 
             if tools.os_info.with_yum:
                 if self.settings.arch == "x86":
@@ -76,13 +80,36 @@ class freeglutConan(ConanFile):
                 packages = ['mesa-libGL-devel%s' % arch_suffix]
                 packages.append('mesa-libGLU-devel%s' % arch_suffix)
                 packages.append('glx-utils%s' % arch_suffix)
+                packages.append('libx11-devel%s' % arch_suffix)
+                packages.append('libXext-devel%s' % arch_suffix)
+                packages.append('libXi-devel%s' % arch_suffix)
 
             for package in packages:
                 installer.install(package)
 
+    def configure_env(self):
+        env = dict()
+        if self.settings.os == 'Linux':
+            if self.settings.arch == 'x86':
+                if tools.detected_architecture() == "x86_64":
+                    env['PKG_CONFIG_PATH'] = '/usr/lib/i386-linux-gnu/pkgconfig'
+
+        return env
+
     def configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
         cmake = CMake(self)
+
+        env = self.configure_env()
+
+        if self.settings.os == 'Linux':
+            if self.settings.arch == 'x86':
+                cmake.definitions['CMAKE_C_FLAGS'] = '-m32'
+                cmake.definitions['CMAKE_CXX_FLAGS'] = '-m32'
+            elif self.settings.arch == 'x86_64':
+                cmake.definitions['CMAKE_C_FLAGS'] = '-m64'
+                cmake.definitions['CMAKE_CXX_FLAGS'] = '-m64'
+
         cmake.definitions["FREEGLUT_BUILD_DEMOS"] = "ON" if self.options.demos else "OFF"
         cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = "OFF" if self.options.shared else "ON"
         cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
@@ -92,17 +119,22 @@ class freeglutConan(ConanFile):
         cmake.definitions["FREEGLUT_INSTALL_PDB"] = "ON" if self.options.install_pdb else "OFF"
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
-        cmake.configure(build_folder=self.build_subfolder, source_folder=self.source_subfolder)
+        with tools.environment_append(env):
+            cmake.configure(build_folder=self.build_subfolder)
         return cmake
 
     def build(self):
         cmake = self.configure_cmake()
-        cmake.build()
+        env = self.configure_env()
+        with tools.environment_append(env):
+            cmake.build()
 
     def package(self):
         self.copy(pattern="COPYING", dst=".", src=self.source_subfolder)
         cmake = self.configure_cmake()
-        cmake.install()
+        env = self.configure_env()
+        with tools.environment_append(env):
+            cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
