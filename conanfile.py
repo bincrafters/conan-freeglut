@@ -147,3 +147,16 @@ class freeglutConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
+        
+        if self.settings.compiler == "Visual Studio":
+            if not self.options.shared:
+                self.cpp_info.libs.append("OpenGL32.lib")
+        else:
+            self.cpp_info.libs.append("opengl32")
+            if self.settings.os == "Macos":
+                self.cpp_info.exelinkflags.append("-framework OpenGL")
+            elif not self.options.shared:
+                self.cpp_info.libs.append("GL")
+
+        for lib in self.cpp_info.libs:
+            self.output.warn(lib)
