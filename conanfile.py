@@ -55,9 +55,15 @@ class freeglutConan(ConanFile):
 
         # Remove with > 3.0.0; https://github.com/dcnieho/FreeGLUT/issues/34
         # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled
-        tools.patch(base_path=self.source_subfolder, patch_file="removed-invalid-pdb-install.patch")
+        tools.patch(base_path=self.source_subfolder, patch_file="0001-removed-invalid-pdb-install.patch")
+
+        # on macOS GLX can't be found https://github.com/dcnieho/FreeGLUT/issues/27
+        tools.patch(base_path=self.source_subfolder, patch_file="0002-macOS-Fix-GLX-not-found.patch")
 
     def system_requirements(self):
+        if self.settings.os == "Macos":
+            self.run("brew cask install xquartz")
+
         if self.settings.os == "Linux" and tools.os_info.is_linux:
             installer = tools.SystemPackageTool()
             if tools.os_info.with_apt:
