@@ -60,6 +60,9 @@ class freeglutConan(ConanFile):
         # on macOS GLX can't be found https://github.com/dcnieho/FreeGLUT/issues/27
         tools.patch(base_path=self.source_subfolder, patch_file="0002-macOS-Fix-GLX-not-found.patch")
 
+        # when build static the default lib name is freeglut_static what causes all kind of trouble to find/include this lib later
+        tools.patch(base_path=self.source_subfolder, patch_file="0003-name-the-library-always-freeglut-not-static.patch")
+
     def system_requirements(self):
         if self.settings.os == "Macos":
             self.run("brew cask install xquartz")
