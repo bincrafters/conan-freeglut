@@ -20,48 +20,46 @@ class freeglutConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "demos": [True, False],
         "gles": [True, False],
         "print_errors_at_runtime": [True, False],
         "print_warnings_at_runtime": [True, False],
         "replace_glut": [True, False],
         "install_pdb": [True, False]
     }
-    default_options = (
-        "shared=False",
-        "fPIC=True",
-        "demos=False",
-        "gles=False",
-        "print_errors_at_runtime=True",
-        "print_warnings_at_runtime=True",
-        "replace_glut=True",
-        "install_pdb=False"
-    )
-    source_subfolder = "source_subfolder"
-    build_subfolder = "build_subfolder"
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "gles": False,
+        "print_errors_at_runtime": True,
+        "print_warnings_at_runtime": True,
+        "replace_glut": True,
+        "install_pdb": False
+    }
+    _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
-            self.options.remove("fPIC")
-            self.options.replace_glut = True
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+            self.options.replace_glut = False
         if self.settings.compiler != "Visual Studio":
             self.options.install_pdb = False
 
     def source(self):
-        archive_url = "https://github.com/dcnieho/FreeGLUT/archive/FG_{}.tar.gz".format(self.version.replace(".", "_"))
+        archive_url = "{}/archive/FG_{}.tar.gz".format(self.homepage, self.version.replace(".", "_"))
         tools.get(archive_url, sha256="b0abf188cfbb572b9f9ef5c6adbeba8eedbd9a717897908ee9840018ab0b8eee")
         extracted_dir = "FreeGLUT-FG_" + self.version.replace(".", "_")
-        os.rename(extracted_dir, self.source_subfolder)
+        os.rename(extracted_dir, self._source_subfolder)
 
         # Remove with > 3.0.0; https://github.com/dcnieho/FreeGLUT/issues/34
         # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled
-        tools.patch(base_path=self.source_subfolder, patch_file="0001-removed-invalid-pdb-install.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="0001-removed-invalid-pdb-install.patch")
 
         # on macOS GLX can't be found https://github.com/dcnieho/FreeGLUT/issues/27
-        tools.patch(base_path=self.source_subfolder, patch_file="0002-macOS-Fix-GLX-not-found.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="0002-macOS-Fix-GLX-not-found.patch")
 
         # when build static the default lib name is freeglut_static what causes all kind of trouble to find/include this lib later
-        tools.patch(base_path=self.source_subfolder, patch_file="0003-name-the-library-always-freeglut-not-static.patch")
+        tools.patch(base_path=self._source_subfolder, patch_file="0003-name-the-library-always-freeglut-not-static.patch")
 
     def system_requirements(self):
         if self.settings.os == "Macos":
@@ -89,37 +87,18 @@ class freeglutConan(ConanFile):
                 packages = ['mesa-libGL-devel%s' % arch_suffix]
                 packages.append('mesa-libGLU-devel%s' % arch_suffix)
                 packages.append('glx-utils%s' % arch_suffix)
-                packages.append('libx11-devel%s' % arch_suffix)
+                packages.append('libX11-devel%s' % arch_suffix)
                 packages.append('libXext-devel%s' % arch_suffix)
                 packages.append('libXi-devel%s' % arch_suffix)
 
             for package in packages:
                 installer.install(package)
 
-    def configure_env(self):
-        env = dict()
-        if self.settings.os == 'Linux':
-            if self.settings.arch == 'x86':
-                if tools.detected_architecture() == "x86_64":
-                    env['PKG_CONFIG_PATH'] = '/usr/lib/i386-linux-gnu/pkgconfig'
-
-        return env
-
-    def configure_cmake(self):
+    def _configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
-        cmake = CMake(self)
+        cmake = CMake(self, set_cmake_flags=True)
 
-        env = self.configure_env()
-
-        if self.settings.os == 'Linux':
-            if self.settings.arch == 'x86':
-                cmake.definitions['CMAKE_C_FLAGS'] = '-m32'
-                cmake.definitions['CMAKE_CXX_FLAGS'] = '-m32'
-            elif self.settings.arch == 'x86_64':
-                cmake.definitions['CMAKE_C_FLAGS'] = '-m64'
-                cmake.definitions['CMAKE_CXX_FLAGS'] = '-m64'
-
-        cmake.definitions["FREEGLUT_BUILD_DEMOS"] = "ON" if self.options.demos else "OFF"
+        cmake.definitions["FREEGLUT_BUILD_DEMOS"] = "OFF"
         cmake.definitions["FREEGLUT_BUILD_STATIC_LIBS"] = "OFF" if self.options.shared else "ON"
         cmake.definitions["FREEGLUT_BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
         cmake.definitions["FREEGLUT_GLES"] = "ON" if self.options.gles else "OFF"
@@ -128,35 +107,56 @@ class freeglutConan(ConanFile):
         cmake.definitions["FREEGLUT_INSTALL_PDB"] = "ON" if self.options.install_pdb else "OFF"
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
-        with tools.environment_append(env):
-            cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure(build_folder=self._build_subfolder)
         return cmake
 
     def build(self):
-        cmake = self.configure_cmake()
-        env = self.configure_env()
-        with tools.environment_append(env):
-            cmake.build()
+        cmake = self._configure_cmake()
+        cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst=".", src=self.source_subfolder)
-        cmake = self.configure_cmake()
-        env = self.configure_env()
-        with tools.environment_append(env):
-            cmake.install()
+        self.copy(pattern="COPYING", dst=".", src=self._source_subfolder)
+        cmake = self._configure_cmake()
+        cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        
-        if self.settings.compiler == "Visual Studio":
-            if not self.options.shared:
-                self.cpp_info.libs.append("OpenGL32.lib")
-        else:
-            self.cpp_info.libs.append("opengl32")
-            if self.settings.os == "Macos":
-                self.cpp_info.exelinkflags.append("-framework OpenGL")
-            elif not self.options.shared:
-                self.cpp_info.libs.append("GL")
+        self.cpp_info.libdirs = ["lib", "lib64"]
 
-        for lib in self.cpp_info.libs:
-            self.output.warn(lib)
+        self.cpp_info.libs = []
+
+        if self.settings.os == "Windows":
+            if self.settings.os == "Windows":
+                if not self.options.shared:
+                    self.cpp_info.defines.append("FREEGLUT_STATIC=1")
+                self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
+                self.cpp_info.libs.append("glu32")
+                self.cpp_info.libs.append("opengl32")
+                self.cpp_info.libs.append("gdi32")
+                self.cpp_info.libs.append("winmm")
+                self.cpp_info.libs.append("user32")
+
+        if self.settings.os == "Macos":
+            self.cpp_info.exelinkflags.append("-framework OpenGL")
+
+        if self.settings.os == "Linux":
+            if not self.options.shared:
+                self.cpp_info.libs.append("GLU")
+                self.cpp_info.libs.append("GL")
+                self.cpp_info.libs.append("Xi")
+                self.cpp_info.libs.append("Xrandr")
+                self.cpp_info.libs.append("Xext")
+                self.cpp_info.libs.append("Xxf86vm")
+                self.cpp_info.libs.append("X11")
+
+
+        if self.options.replace_glut:
+            if self.options.shared:
+                self.cpp_info.libs.append("libglut.so")
+            else:
+                self.cpp_info.libs.append("libglut.a")
+        else:
+            self.cpp_info.libs.append("freeglut")
+
+        # self.cpp_info.libs.extend(tools.collect_libs(self))
+        # self.output.info(tools.collect_libs(self))
+        self.output.info(self.cpp_info.libs)
