@@ -9,6 +9,7 @@ class freeglutConan(ConanFile):
     name = "freeglut"
     version = "3.0.0"
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
+    topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/Croydon/conan-freeglut"
     homepage = "https://github.com/dcnieho/FreeGLUT"
     author = "Bincrafters <bincrafters@gmail.com>"

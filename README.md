@@ -1,5 +1,5 @@
 [![Download](https://api.bintray.com/packages/bincrafters/public-conan/freeglut%3Abincrafters/images/download.svg) ](https://bintray.com/bincrafters/public-conan/freeglut%3Abincrafters/_latestVersion)
-[![Build Status Travis](https://travis-ci.org/bincrafters/conan-freeglut.svg?branch=stable%2F3.0.0)](https://travis-ci.org/bincrafters/conan-freeglut)
+[![Build Status Travis](https://travis-ci.com/bincrafters/conan-freeglut.svg?branch=stable%2F3.0.0)](https://travis-ci.com/bincrafters/conan-freeglut)
 [![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/bincrafters/conan-freeglut?branch=stable%2F3.0.0&svg=true)](https://ci.appveyor.com/project/bincrafters/conan-freeglut)
 
 ## Conan package recipe for [*freeglut*](https://github.com/dcnieho/FreeGLUT)
@@ -11,9 +11,9 @@ The packages generated with this **conanfile** can be found on [Bintray](https:/
 
 ## Issues
 
-If you wish to report an issue or make a request for a Bincrafters package, please do so here:
+If you wish to report an issue or make a request for a package, please do so here:
 
-[Bincrafters Community Issues](https://github.com/bincrafters/community/issues)
+[Issues Tracker](https://github.com/bincrafters/community/issues)
 
 
 ## For Users
@@ -68,4 +68,4 @@ The following command both runs all the steps of the conan file, and publishes t
 NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package freeglut.
 It does *not* in any way apply or is related to the actual software being packaged.
 
-[MIT](https://github.com/Croydon/conan-freeglut/blob/stable/3.0.0/LICENSE.md)
+[MIT](https://github.com/bincrafters/conan-freeglut/blob/stable/3.0.0/LICENSE.md)
