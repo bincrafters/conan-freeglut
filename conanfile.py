@@ -149,15 +149,15 @@ class freeglutConan(ConanFile):
                 self.cpp_info.libs.append("Xxf86vm")
                 self.cpp_info.libs.append("X11")
 
-
         if self.options.replace_glut:
             if self.options.shared:
                 self.cpp_info.libs.append("libglut.so")
             else:
                 self.cpp_info.libs.append("libglut.a")
         else:
-            self.cpp_info.libs.append("freeglut")
+            if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
+                self.cpp_info.libs.append("freeglutd")
+            else:
+                self.cpp_info.libs.append("freeglut")
 
-        # self.cpp_info.libs.extend(tools.collect_libs(self))
-        # self.output.info(tools.collect_libs(self))
         self.output.info(self.cpp_info.libs)
