@@ -175,8 +175,6 @@ class freeglutConan(ConanFile):
             self.cpp_info.libs.append("Xxf86vm")
             self.cpp_info.libs.append("Xrandr")
             self.cpp_info.libs.append("Xi")
-            self.cpp_info.libs.append("GLX")
-            self.cpp_info.libs.append("GLdispatch")
             self.cpp_info.libs.append("xcb")
             self.cpp_info.libs.append("Xext")
             self.cpp_info.libs.append("Xrender")
