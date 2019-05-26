@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from conans import ConanFile, CMake, tools
@@ -10,7 +9,7 @@ class freeglutConan(ConanFile):
     version = "3.0.0"
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
     topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
-    url = "https://github.com/Croydon/conan-freeglut"
+    url = "https://github.com/bincrafters/conan-freeglut"
     homepage = "https://github.com/dcnieho/FreeGLUT"
     author = "Bincrafters <bincrafters@gmail.com>"
     license = "X11"
@@ -36,8 +35,14 @@ class freeglutConan(ConanFile):
         "replace_glut": True,
         "install_pdb": False
     }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+
+    @property
+    def _source_subfolder(self):
+        return "source_subfolder"
+
+    @property
+    def _build_subfolder(self):
+        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,6 +50,9 @@ class freeglutConan(ConanFile):
             self.options.replace_glut = False
         if self.settings.compiler != "Visual Studio":
             self.options.install_pdb = False
+
+    def configure(self):
+        del self.settings.compiler.libcxx
 
     def source(self):
         archive_url = "{}/archive/FG_{}.tar.gz".format(self.homepage, self.version.replace(".", "_"))
@@ -68,8 +76,9 @@ class freeglutConan(ConanFile):
 
         if self.settings.os == "Linux" and tools.os_info.is_linux:
             installer = tools.SystemPackageTool()
+            arch_suffix = ""
             if tools.os_info.with_apt:
-                if self.settings.arch == "x86":
+                if self.settings.arch == "x86" and tools.cross_building(self.settings):
                     arch_suffix = ':i386'
                 elif self.settings.arch == "x86_64":
                     arch_suffix = ':amd64'
@@ -79,9 +88,10 @@ class freeglutConan(ConanFile):
                 packages.append('libx11-dev%s' % arch_suffix)
                 packages.append('libxext-dev%s' % arch_suffix)
                 packages.append('libxi-dev%s' % arch_suffix)
+                packages.append('libxrandr-dev%s' % arch_suffix)
 
-            if tools.os_info.with_yum:
-                if self.settings.arch == "x86":
+            elif tools.os_info.with_yum:
+                if self.settings.arch == "x86" and tools.cross_building(self.settings):
                     arch_suffix = '.i686'
                 elif self.settings.arch == 'x86_64':
                     arch_suffix = '.x86_64'
@@ -92,8 +102,16 @@ class freeglutConan(ConanFile):
                 packages.append('libXext-devel%s' % arch_suffix)
                 packages.append('libXi-devel%s' % arch_suffix)
 
-            for package in packages:
-                installer.install(package)
+            elif tools.os_info.with_pacman:
+                if self.settings.arch == "x86" and tools.cross_building(self.settings):
+                    arch_suffix = 'lib32-'
+                packages = ['%smesa' % arch_suffix]
+                packages.append('%sglu' % arch_suffix)
+                packages.append('%slibx11' % arch_suffix)
+                packages.append('%slibxext' % arch_suffix)
+                packages.append('%slibxi' % arch_suffix)
+
+            installer.install(" ".join(packages))
 
     def _configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
@@ -117,38 +135,15 @@ class freeglutConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING", dst=".", src=self._source_subfolder)
+        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
         cmake = self._configure_cmake()
         cmake.install()
+        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib", "lib64"]
 
         self.cpp_info.libs = []
-
-        if self.settings.os == "Windows":
-            if self.settings.os == "Windows":
-                if not self.options.shared:
-                    self.cpp_info.defines.append("FREEGLUT_STATIC=1")
-                self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
-                self.cpp_info.libs.append("glu32")
-                self.cpp_info.libs.append("opengl32")
-                self.cpp_info.libs.append("gdi32")
-                self.cpp_info.libs.append("winmm")
-                self.cpp_info.libs.append("user32")
-
-        if self.settings.os == "Macos":
-            self.cpp_info.exelinkflags.append("-framework OpenGL")
-
-        if self.settings.os == "Linux":
-            if not self.options.shared:
-                self.cpp_info.libs.append("GLU")
-                self.cpp_info.libs.append("GL")
-                self.cpp_info.libs.append("Xi")
-                self.cpp_info.libs.append("Xrandr")
-                self.cpp_info.libs.append("Xext")
-                self.cpp_info.libs.append("Xxf86vm")
-                self.cpp_info.libs.append("X11")
 
         if self.options.replace_glut:
             if self.options.shared:
@@ -160,5 +155,35 @@ class freeglutConan(ConanFile):
                 self.cpp_info.libs.append("freeglutd")
             else:
                 self.cpp_info.libs.append("freeglut")
+
+        if self.settings.os == "Windows":
+            if not self.options.shared:
+                self.cpp_info.defines.append("FREEGLUT_STATIC=1")
+            self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
+            self.cpp_info.libs.append("glu32")
+            self.cpp_info.libs.append("opengl32")
+            self.cpp_info.libs.append("gdi32")
+            self.cpp_info.libs.append("winmm")
+            self.cpp_info.libs.append("user32")
+
+        if self.settings.os == "Macos":
+            self.cpp_info.exelinkflags.append("-framework OpenGL")
+
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.append("GL")
+            self.cpp_info.libs.append("GLU")
+            self.cpp_info.libs.append("Xxf86vm")
+            self.cpp_info.libs.append("Xrandr")
+            self.cpp_info.libs.append("Xi")
+            self.cpp_info.libs.append("GLX")
+            self.cpp_info.libs.append("GLdispatch")
+            self.cpp_info.libs.append("xcb")
+            self.cpp_info.libs.append("Xext")
+            self.cpp_info.libs.append("Xrender")
+            self.cpp_info.libs.append("X11")
+            self.cpp_info.libs.append("pthread")
+            self.cpp_info.libs.append("m")
+            self.cpp_info.libs.append("dl")
+            self.cpp_info.libs.append("rt")
 
         self.output.info(self.cpp_info.libs)
