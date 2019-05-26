@@ -146,10 +146,7 @@ class freeglutConan(ConanFile):
         self.cpp_info.libs = []
 
         if self.options.replace_glut:
-            if self.options.shared:
-                self.cpp_info.libs.append("libglut.so")
-            else:
-                self.cpp_info.libs.append("libglut.a")
+            self.cpp_info.libs.append("glut")
         else:
             if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
                 self.cpp_info.libs.append("freeglutd")
