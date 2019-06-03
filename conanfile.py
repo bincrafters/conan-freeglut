@@ -169,6 +169,7 @@ class freeglutConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.exelinkflags.append("-framework OpenGL")
             self.cpp_info.exelinkflags.append("-framework CoreGraphics")
+            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
         if self.settings.os == "Linux":
             self.cpp_info.libs.append("GL")
