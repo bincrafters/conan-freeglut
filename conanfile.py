@@ -73,10 +73,9 @@ class freeglutConan(ConanFile):
     def system_requirements(self):
         if self.settings.os == "Macos" and tools.os_info.is_macos:
             installer = tools.SystemPackageTool()
-            instaler.install("xquartz")
+            installer.install("xquartz")
 
         if self.settings.os == "Linux" and tools.os_info.is_linux:
-            installer = tools.SystemPackageTool()
             arch_suffix = ""
             if tools.os_info.with_apt:
                 if self.settings.arch == "x86" and tools.cross_building(self.settings):
