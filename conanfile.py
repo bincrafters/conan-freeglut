@@ -71,8 +71,9 @@ class freeglutConan(ConanFile):
         tools.patch(base_path=self._source_subfolder, patch_file="0003-name-the-library-always-freeglut-not-static.patch")
 
     def system_requirements(self):
-        if self.settings.os == "Macos":
-            self.run("brew cask install xquartz")
+        if self.settings.os == "Macos" and tools.os_info.is_macos:
+            installer = tools.SystemPackageTool()
+            instaler.install("xquartz")
 
         if self.settings.os == "Linux" and tools.os_info.is_linux:
             installer = tools.SystemPackageTool()
