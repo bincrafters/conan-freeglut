@@ -72,11 +72,13 @@ class freeglutConan(ConanFile):
 
     def system_requirements(self):
         if self.settings.os == "Macos" and tools.os_info.is_macos:
-            installer = tools.SystemPackageTool()
-            installer.install("xquartz")
+            # INFO (uilian): SystemPackageTools doesn't offer cask
+            self.run("brew cask install xquartz")
 
-        if self.settings.os == "Linux" and tools.os_info.is_linux:
+        elif self.settings.os == "Linux" and tools.os_info.is_linux:
+            installer = tools.SystemPackageTool()
             arch_suffix = ""
+            packages = []
             if tools.os_info.with_apt:
                 if self.settings.arch == "x86" and tools.cross_building(self.settings):
                     arch_suffix = ':i386'
@@ -111,7 +113,8 @@ class freeglutConan(ConanFile):
                 packages.append('%slibxext' % arch_suffix)
                 packages.append('%slibxi' % arch_suffix)
 
-            installer.install(" ".join(packages))
+            if packages:
+                installer.install(" ".join(packages))
 
     def _configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
