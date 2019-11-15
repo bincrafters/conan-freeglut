@@ -9,7 +9,6 @@ class freeglutConan(ConanFile):
     topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/bincrafters/conan-freeglut"
     homepage = "https://github.com/dcnieho/FreeGLUT"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "X11"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt", "*.patch"]
