@@ -1,7 +1,1 @@
-env:
-  global:
-    - CONAN_DOCKER_32_IMAGES: 1
-
-import: 
-  - bincrafters/templates:.ci/travis-linux.yml@master
-  - bincrafters/templates:.ci/travis-macos.yml@master
+import: bincrafters/templates:.ci/travis-macos.yml@master
