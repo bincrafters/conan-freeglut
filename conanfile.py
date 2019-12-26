@@ -52,6 +52,13 @@ class freeglutConan(ConanFile):
         del self.settings.compiler.libcxx
         del self.settings.compiler.cppstd
 
+    def requirements(self):
+        if self.settings.os == 'Linux':
+            self.requires('mesa/19.3.1@bincrafters/stable')
+            self.requires('mesa-glu/9.0.1@bincrafters/stable')
+            self.requires('libxi/1.7.10@bincrafters/stable')
+
+
     def source(self):
         archive_url = "{}/archive/FG_{}.tar.gz".format(self.homepage, self.version.replace(".", "_"))
         tools.get(archive_url, sha256="b0abf188cfbb572b9f9ef5c6adbeba8eedbd9a717897908ee9840018ab0b8eee")
@@ -72,47 +79,6 @@ class freeglutConan(ConanFile):
         if self.settings.os == "Macos" and tools.os_info.is_macos:
             # INFO (uilian): SystemPackageTools doesn't offer cask
             self.run("brew cask install xquartz")
-
-        elif self.settings.os == "Linux" and tools.os_info.is_linux:
-            installer = tools.SystemPackageTool()
-            arch_suffix = ""
-            packages = []
-            if tools.os_info.with_apt:
-                if self.settings.arch == "x86" and tools.cross_building(self.settings):
-                    arch_suffix = ':i386'
-                elif self.settings.arch == "x86_64":
-                    arch_suffix = ':amd64'
-                packages = ['libgl1-mesa-dev%s' % arch_suffix]
-                packages.append('libglu1-mesa-dev%s' % arch_suffix)
-                packages.append('libgl1-mesa-glx%s' % arch_suffix)
-                packages.append('libx11-dev%s' % arch_suffix)
-                packages.append('libxext-dev%s' % arch_suffix)
-                packages.append('libxi-dev%s' % arch_suffix)
-                packages.append('libxrandr-dev%s' % arch_suffix)
-
-            elif tools.os_info.with_yum:
-                if self.settings.arch == "x86" and tools.cross_building(self.settings):
-                    arch_suffix = '.i686'
-                elif self.settings.arch == 'x86_64':
-                    arch_suffix = '.x86_64'
-                packages = ['mesa-libGL-devel%s' % arch_suffix]
-                packages.append('mesa-libGLU-devel%s' % arch_suffix)
-                packages.append('glx-utils%s' % arch_suffix)
-                packages.append('libX11-devel%s' % arch_suffix)
-                packages.append('libXext-devel%s' % arch_suffix)
-                packages.append('libXi-devel%s' % arch_suffix)
-
-            elif tools.os_info.with_pacman:
-                if self.settings.arch == "x86" and tools.cross_building(self.settings):
-                    arch_suffix = 'lib32-'
-                packages = ['%smesa' % arch_suffix]
-                packages.append('%sglu' % arch_suffix)
-                packages.append('%slibx11' % arch_suffix)
-                packages.append('%slibxext' % arch_suffix)
-                packages.append('%slibxi' % arch_suffix)
-
-            if packages:
-                installer.install(" ".join(packages))
 
     def _configure_cmake(self):
         # See https://github.com/dcnieho/FreeGLUT/blob/44cf4b5b85cf6037349c1c8740b2531d7278207d/README.cmake
@@ -170,18 +136,9 @@ class freeglutConan(ConanFile):
             self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
 
         if self.settings.os == "Linux":
-            self.cpp_info.libs.append("GL")
-            self.cpp_info.libs.append("GLU")
-            self.cpp_info.libs.append("Xxf86vm")
-            self.cpp_info.libs.append("Xrandr")
-            self.cpp_info.libs.append("Xi")
-            self.cpp_info.libs.append("xcb")
-            self.cpp_info.libs.append("Xext")
-            self.cpp_info.libs.append("Xrender")
-            self.cpp_info.libs.append("X11")
-            self.cpp_info.libs.append("pthread")
-            self.cpp_info.libs.append("m")
-            self.cpp_info.libs.append("dl")
-            self.cpp_info.libs.append("rt")
+            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.append("rt")
 
         self.output.info(self.cpp_info.libs)
