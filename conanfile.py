@@ -124,16 +124,14 @@ class freeglutConan(ConanFile):
             if not self.options.shared:
                 self.cpp_info.defines.append("FREEGLUT_STATIC=1")
             self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
-            self.cpp_info.libs.append("glu32")
-            self.cpp_info.libs.append("opengl32")
-            self.cpp_info.libs.append("gdi32")
-            self.cpp_info.libs.append("winmm")
-            self.cpp_info.libs.append("user32")
+            self.cpp_info.system_libs.append("glu32")
+            self.cpp_info.system_libs.append("opengl32")
+            self.cpp_info.system_libs.append("gdi32")
+            self.cpp_info.system_libs.append("winmm")
+            self.cpp_info.system_libs.append("user32")
 
         if self.settings.os == "Macos":
-            self.cpp_info.exelinkflags.append("-framework OpenGL")
-            self.cpp_info.exelinkflags.append("-framework CoreGraphics")
-            self.cpp_info.sharedlinkflags = self.cpp_info.exelinkflags
+            self.cpp_info.frameworks = ['OpenGL', 'CoreGraphics']
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
