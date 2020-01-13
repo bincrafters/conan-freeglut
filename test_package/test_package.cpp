@@ -24,12 +24,13 @@ void renderScene(void) {
 
 int main(int argc, char **argv) {
     glutInitErrorFunc(error_handler);
-    glutInit(&argc,argv);
     std::cout << std::endl << "FreeGLUT version:" << std::endl;
     std::cout << glutGet(GLUT_VERSION);
     std::cout << std::endl;
 
-    /*glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+    /*
+    glutInit(&argc,argv);
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(320,320);
 	glutCreateWindow("Lighthouse3D - GLUT Tutorial");
