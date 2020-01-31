@@ -4,13 +4,12 @@ import os
 
 class freeglutConan(ConanFile):
     name = "freeglut"
-    version = "3.0.0"
+    version = "3.2.1"
     description = "Open-source alternative to the OpenGL Utility Toolkit (GLUT) library"
     topics = ("conan", "freeglut", "opengl", "gl", "glut", "utility", "toolkit", "graphics")
     url = "https://github.com/bincrafters/conan-freeglut"
     homepage = "https://github.com/dcnieho/FreeGLUT"
     license = "X11"
-    exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt", "*.patch"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
@@ -61,19 +60,12 @@ class freeglutConan(ConanFile):
 
     def source(self):
         archive_url = "{}/archive/FG_{}.tar.gz".format(self.homepage, self.version.replace(".", "_"))
-        tools.get(archive_url, sha256="b0abf188cfbb572b9f9ef5c6adbeba8eedbd9a717897908ee9840018ab0b8eee")
+        tools.get(archive_url, sha256="23b93b77ac01bc70af0c56fa3316f25ea8f136603f93df319ca74867e15134d3")
         extracted_dir = "FreeGLUT-FG_" + self.version.replace(".", "_")
         os.rename(extracted_dir, self._source_subfolder)
 
-        # Remove with > 3.0.0; https://github.com/dcnieho/FreeGLUT/issues/34
-        # Windows build fails to install with FREEGLUT_BUILD_STATIC_LIBS and INSTALL_PDB enabled
-        tools.patch(base_path=self._source_subfolder, patch_file="0001-removed-invalid-pdb-install.patch")
-
         # on macOS GLX can't be found https://github.com/dcnieho/FreeGLUT/issues/27
-        tools.patch(base_path=self._source_subfolder, patch_file="0002-macOS-Fix-GLX-not-found.patch")
-
-        # when build static the default lib name is freeglut_static what causes all kind of trouble to find/include this lib later
-        tools.patch(base_path=self._source_subfolder, patch_file="0003-name-the-library-always-freeglut-not-static.patch")
+        # tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patch", "0002-macOS-Fix-GLX-not-found.patch"))
 
     def system_requirements(self):
         if self.settings.os == "Macos" and tools.os_info.is_macos:
@@ -106,19 +98,15 @@ class freeglutConan(ConanFile):
         cmake = self._configure_cmake()
         cmake.install()
         tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libdirs = ["lib", "lib64"]
 
-        self.cpp_info.libs = []
-
         if self.options.replace_glut:
-            self.cpp_info.libs.append("glut")
+            self.cpp_info.libs = ["glut"]
         else:
-            if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
-                self.cpp_info.libs.append("freeglutd")
-            else:
-                self.cpp_info.libs.append("freeglut")
+            self.cpp_info.libs = tools.collect_libs(self)
 
         if self.settings.os == "Windows":
             if not self.options.shared:
