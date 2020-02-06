@@ -65,7 +65,7 @@ class freeglutConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
         # on macOS GLX can't be found https://github.com/dcnieho/FreeGLUT/issues/27
-        # tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patch", "0002-macOS-Fix-GLX-not-found.patch"))
+        tools.patch(base_path=self._source_subfolder, patch_file=os.path.join("patch", "0002-macOS-Fix-GLX-not-found.patch"))
 
     def system_requirements(self):
         if self.settings.os == "Macos" and tools.os_info.is_macos:
