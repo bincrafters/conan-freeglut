@@ -121,7 +121,7 @@ class freeglutConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ['CoreGraphics']
             self.cpp_info.system_libs.extend(['GL', 'GLU'])
-            self.cpp_info.libdirs.extend(['/opt/X11/lib', '/usr/X11/lib', '/usr/X11R6/lib'])
+            self.cpp_info.libdirs.extend(['/System/Library/Frameworks/ImageIO.framework/Resources', '/opt/X11/lib', '/usr/X11/lib', '/usr/X11R6/lib'])
 
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("pthread")
