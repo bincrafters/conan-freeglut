@@ -48,11 +48,10 @@ class freeglutConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        if self.settings.os == 'Linux':
-            self.requires('mesa/19.3.1@bincrafters/stable')
+        self.requires("opengl/virtual@bincrafters/stable")
+        if self.settings.os == "Linux":
             self.requires('mesa-glu/9.0.1@bincrafters/stable')
             self.requires('libxi/1.7.10@bincrafters/stable')
-
 
     def source(self):
         archive_url = "{}/archive/FG_{}.tar.gz".format(self.homepage, self.version.replace(".", "_"))
@@ -109,13 +108,12 @@ class freeglutConan(ConanFile):
                 self.cpp_info.defines.append("FREEGLUT_STATIC=1")
             self.cpp_info.defines.append("FREEGLUT_LIB_PRAGMAS=0")
             self.cpp_info.system_libs.append("glu32")
-            self.cpp_info.system_libs.append("opengl32")
             self.cpp_info.system_libs.append("gdi32")
             self.cpp_info.system_libs.append("winmm")
             self.cpp_info.system_libs.append("user32")
 
         if self.settings.os == "Macos":
-            self.cpp_info.system_libs.extend(['GL', 'GLU'])
+            self.cpp_info.system_libs.extend(['GLU'])
             self.cpp_info.libdirs.extend(['/System/Library/Frameworks/ImageIO.framework/Resources', '/opt/X11/lib', '/usr/X11/lib', '/usr/X11R6/lib'])
 
         if self.settings.os == "Linux":
