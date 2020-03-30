@@ -20,7 +20,6 @@ class freeglutConan(ConanFile):
         "print_errors_at_runtime": [True, False],
         "print_warnings_at_runtime": [True, False],
         "replace_glut": [True, False],
-        "install_pdb": [True, False]
     }
     default_options = {
         "shared": False,
@@ -29,7 +28,6 @@ class freeglutConan(ConanFile):
         "print_errors_at_runtime": True,
         "print_warnings_at_runtime": True,
         "replace_glut": True,
-        "install_pdb": False
     }
 
     @property
@@ -44,8 +42,6 @@ class freeglutConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             self.options.replace_glut = False
-        if self.settings.compiler != "Visual Studio":
-            self.options.install_pdb = False
 
     def configure(self):
         del self.settings.compiler.libcxx
@@ -82,7 +78,7 @@ class freeglutConan(ConanFile):
         cmake.definitions["FREEGLUT_GLES"] = "ON" if self.options.gles else "OFF"
         cmake.definitions["FREEGLUT_PRINT_ERRORS"] = "ON" if self.options.print_errors_at_runtime else "OFF"
         cmake.definitions["FREEGLUT_PRINT_WARNINGS"] = "ON" if self.options.print_warnings_at_runtime else "OFF"
-        cmake.definitions["FREEGLUT_INSTALL_PDB"] = "ON" if self.options.install_pdb else "OFF"
+        cmake.definitions["FREEGLUT_INSTALL_PDB"] = "OFF"
         cmake.definitions["INSTALL_PDB"] = False
         # cmake.definitions["FREEGLUT_WAYLAND"] = "ON" if self.options.wayland else "OFF" # nightly version only as of now
 
