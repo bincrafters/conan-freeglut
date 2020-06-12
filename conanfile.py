@@ -48,7 +48,7 @@ class freeglutConan(ConanFile):
         del self.settings.compiler.cppstd
 
     def requirements(self):
-        self.requires("opengl/virtual@bincrafters/stable")
+        self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires('mesa-glu/9.0.1@bincrafters/stable')
             self.requires('libxi/1.7.10@bincrafters/stable')
