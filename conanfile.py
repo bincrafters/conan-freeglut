@@ -49,9 +49,9 @@ class freeglutConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
+        self.requires('glu/system')
         if self.settings.os == "Linux":
-            self.requires('mesa-glu/9.0.1@bincrafters/stable')
-            self.requires('libxi/1.7.10@bincrafters/stable')
+            self.requires("xorg/system")
 
     def source(self):
         archive_url = "{}/archive/FG_{}.tar.gz".format(self.homepage, self.version.replace(".", "_"))
